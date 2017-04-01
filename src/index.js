@@ -1,6 +1,7 @@
 import placeholder from './placeholder.js'
 import {extend, raf} from './util.js'
 import {on, fire} from './event.js'
+import list from './list.js'
 
 const DEFAULT = {
   rootTag: 'ul',
@@ -20,71 +21,25 @@ const DEFAULT = {
   }
 }
 
-const fetch = state => {
-  fire('fetch:before')
-  const promise = state.fetch(state.cursor)
-  state.afterFetch(promise, state.list)
-  promise
-  .then(() => {
-    state.cursor += state.step
-  })
-  .then(() => {
-    fire('fetch:after')
-  })
-
-  return promise
-}
-
-const checkBoundAndFetch = vnode => {
-  const bound = vnode.dom.getBoundingClientRect()
-  const winHeight = window.innerHeight
-  
-  if (bound.bottom - winHeight < vnode.state.triggerDistance) {
-    vnode.state.isLoading = true
-    fetch(vnode.state).then(() => vnode.state.isLoading = false)
-  }
-}
-
-const fetchEnoughData = vnode => {
-  fetch(vnode.state).
-  then(() => {
-    setTimeout(() => {
-      if (vnode.dom.getBoundingClientRect().bottom - window.innerHeight < vnode.state.triggerDistance) {
-        fetchEnoughData(vnode)
-      }
-    }, 0)
-  })
-}
-
 const oninit = vnode => {
-  const attrs = vnode.attrs
-  const state = vnode.state
-
-  extend(state, DEFAULT, attrs)
-  state.isLoading = false
+  extend(vnode.state, DEFAULT, vnode.attrs)
 }
 
 const oncreate = vnode => {
   const state = vnode.state
-
   state.onscroll = () => {
     raf(() => {
-      if (state.isLoading) return
-      checkBoundAndFetch(vnode)
+      fire('onscroll')
     })
   }
   window.addEventListener('scroll', state.onscroll)
-
-  fetchEnoughData(vnode)
 }
 
 const view = vnode => {
   const state = vnode.state
 
   return [
-    m(state.rootTag,
-      state.list.map((data, index) => state.item(data, index))
-    ),
+    m(list, {options: state}),
     m(placeholder, {
       loadingText: state.loadingText
     })

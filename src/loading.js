@@ -29,9 +29,9 @@ const oncreate = vnode => {
 }
 
 const view = vnode => {
-  const attrs = vnode.attrs
+  const options = vnode.attrs.options
 
-  return m('div', {style: vnode.state.style}, attrs.loadingText)
+  return m('div', {style: vnode.state.style}, options.loadingText)
 }
 
 export default {

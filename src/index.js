@@ -1,4 +1,4 @@
-import placeholder from './placeholder.js'
+import loading from './loading.js'
 import {extend, raf} from './util.js'
 import {on, fire} from './event.js'
 import list from './list.js'
@@ -40,9 +40,7 @@ const view = vnode => {
 
   return [
     m(list, {options: state}),
-    m(placeholder, {
-      loadingText: state.loadingText
-    })
+    m(loading, {options: state})
   ]
 }
 

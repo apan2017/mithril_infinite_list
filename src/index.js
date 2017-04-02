@@ -54,11 +54,11 @@ const onremove = vnode => {
   window.removeEventListener('scroll', vnode.state.onscroll)
 }
 
-const infList = {
+const infiniteList = {
   oninit,
   oncreate,
   view,
   onremove
 }
 
-window.infList = infList
+module.exports = infiniteList

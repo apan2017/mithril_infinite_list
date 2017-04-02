@@ -3,6 +3,7 @@ module.exports = {
     output: {
         path: '.',
         filename: 'infinite_list.js',
+        library: 'infiniteList'
     },
     module: {
         loaders: [{

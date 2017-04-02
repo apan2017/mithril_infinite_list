@@ -1,5 +1,5 @@
 m.mount(document.querySelector('main'), {
-  view: vnode => m(infList, {
+  view: vnode => m(infiniteList, {
     rootTag: 'ol',
     pullRefreshable: true,
     item: (data, index) => m('li', data.title),

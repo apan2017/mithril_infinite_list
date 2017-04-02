@@ -2,6 +2,7 @@ import loading from './loading.js'
 import {extend, raf} from './util.js'
 import {on, fire} from './event.js'
 import list from './list.js'
+import pullRefresh from './pull_refresh.js'
 
 const DEFAULT = {
   rootTag: 'ul',
@@ -9,7 +10,10 @@ const DEFAULT = {
   cursor: 1,
   step: 1,
   triggerDistance: 200,
-  loadingText: 'loading...',
+  loadingText: '正在加载',
+  pullDownText: '下拉刷新',
+  refreshText: '松开刷新',
+  pullLimitHeight: 100,
   item: () => { throw new Error('You must declare `item` function.') },
   fetch: () => { throw new Error('You must declare `fetch` function.') },
   afterFetch: (promose, list) => {
@@ -38,10 +42,11 @@ const oncreate = vnode => {
 const view = vnode => {
   const state = vnode.state
 
-  return [
+  return m('div', [
+    m(pullRefresh, {options: state}),
     m(list, {options: state}),
     m(loading, {options: state})
-  ]
+  ])
 }
 
 const onremove = vnode => {

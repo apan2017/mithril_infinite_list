@@ -38,32 +38,35 @@ const fetchEnoughData = vnode => {
   })
 }
 
-const onmousedown = (e, vnode) => {
-  vnode.state.mouseStatus = 'down'
+const ontouchstart = (e, vnode) => {
+  if (document.body.scrollTop > 0) return
+
+  vnode.state.touchStatus = 'start'
+  vnode.state.mouseY = e.pageY
+  fire('pull:start')
 }
 
-const onmouseup = (e, vnode) => {
-  vnode.state.mouseStatus = 'up'
-  vnode.state.mouseY = 0
+const ontouchend = (e, vnode) => {
+  if (vnode.state.touchStatus === 'end') return
+
+  vnode.state.touchStatus = 'end'
+  fire('pull:end')
 }
 
-const onmousemove = (e, vnode) => {
+const ontouchmove = (e, vnode) => {
   raf(() => {
-    if (vnode.state.mouseStatus === 'up') return
+    if (vnode.state.touchStatus === 'end') return
     if (e.pageY <= vnode.state.mouseY) return
-
-
-    vnode.state.mouseY = e.pageY
+    fire('pull:move', e.pageY - vnode.state.mouseY)
   })
 }
 
 const initMouseMove = vnode => {
-  vnode.state.mouseStatus = 'up'
-  vnode.state.mouseY = 0
-  vnode.state.mouseEvents = {
-    onmousedown: e => onmousedown(e, vnode),
-    onmouseup: e => onmouseup(e, vnode),
-    onmousemove: e => onmousemove(e, vnode)
+  vnode.state.touchStatus = 'end'
+  vnode.state.touchEvents = {
+    ontouchstart: e => ontouchstart(e, vnode),
+    ontouchend: e => ontouchend(e, vnode),
+    ontouchmove: e => ontouchmove(e, vnode)
   }
 }
 
@@ -79,6 +82,12 @@ const oncreate = vnode => {
     if (vnode.state.isLoading) return
     checkBoundAndFetch(vnode)
   })
+
+  on('pull:refresh', () => {
+    vnode.attrs.options.cursor = 1
+    vnode.attrs.options.list = []
+    fetchEnoughData(vnode)
+  })
 }
 
 const view = vnode => {
@@ -87,7 +96,7 @@ const view = vnode => {
 
   return(
     m(options.rootTag,
-      state.mouseEvents,
+      state.touchEvents,
       options.list.map((data, index) => options.item(data, index))
     )
   )

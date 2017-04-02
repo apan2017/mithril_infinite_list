@@ -14,6 +14,7 @@ const DEFAULT = {
   loadingText: '正在加载',
   pullDownText: '下拉刷新',
   refreshText: '松开刷新',
+  refreshingText: '正在加载',
   pullLimitHeight: 60,
   item: () => { throw new Error('You must declare `item` function.') },
   fetch: () => { throw new Error('You must declare `fetch` function.') },

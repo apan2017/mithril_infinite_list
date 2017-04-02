@@ -8,13 +8,31 @@ const oninit = vnode => {
     textAlign: 'center'
   }
 
-
   vnode.state.isReadyRefresh = false
+  vnode.state.isRefreshing = false
+}
+
+const slideUp = (vnode, n, minHeight) => {
+  minHeight = minHeight || 0
+
+  raf(() => {
+    vnode.state.height -= n
+    vnode.state.style.height = vnode.state.height + 'px'
+    m.redraw()
+
+    if (vnode.state.height >= minHeight) {
+      slideUp(vnode, n, minHeight)
+    } else {
+      vnode.state.style.height = minHeight + 'px'
+      m.redraw()
+    }
+  })
 }
 
 const oncreate = vnode => {
   const options = vnode.attrs.options
   const dom = vnode.dom
+  const n = vnode.state.height / 10
 
   on('pull:start', () => {
     vnode.state.isReadyRefresh = false
@@ -24,26 +42,12 @@ const oncreate = vnode => {
   })
 
   on('pull:end', () => {
-    const step = vnode.state.height / 10
-    var height = vnode.state.height
-
-    const a = () => {
-      raf(() => {
-        height -= step
-        vnode.state.style.height = height + 'px'
-        m.redraw()
-
-        if (height > 0) {
-          a()
-        } else {
-          vnode.state.style.height = '0px'
-          if (options.pullLimitHeight < vnode.state.height) {
-            fire('pull:refresh')
-          }
-        }
-      })
+    if (vnode.attrs.options.pullLimitHeight <= vnode.state.height) {
+      slideUp(vnode, n, dom.children[0].offsetHeight)
+      fire('pull:refresh')
+    } else {
+      slideUp(vnode, n, 0)
     }
-    a()
   })
 
   on('pull:move', height => {
@@ -57,14 +61,31 @@ const oncreate = vnode => {
       m.redraw()
     })
   })
+
+  on('refresh:before', () => {
+    vnode.state.isRefreshing = true
+    m.redraw()
+  })
+
+  on('refresh:after', () => {
+    vnode.state.isRefreshing = false
+    m.redraw()
+    slideUp(vnode, n, 0)
+  })
 }
 
 const view = vnode => {
   const options = vnode.attrs.options
   const state = vnode.state
 
+  var text
+  text = state.isReadyRefresh ? options.refreshText : options.pullDownText
+  text = state.isRefreshing ? options.refreshingText : text
+
   return(
-    m('div', {style: vnode.state.style}, state.isReadyRefresh ? options.refreshText : options.pullDownText)
+    m('div', {style: vnode.state.style}, [
+      m('span', text)
+    ])
   )
 }
 

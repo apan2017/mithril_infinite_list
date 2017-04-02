@@ -23,21 +23,18 @@ const checkBoundAndFetch = vnode => {
 }
 
 const fetchEnoughData = vnode => {
-  fire('fetch:before')
-  fetch(vnode).
-  then(() => {
-    setTimeout(() => {
-      if (vnode.dom.getBoundingClientRect().bottom - window.innerHeight < vnode.attrs.options.triggerDistance) {
-        fetchEnoughData(vnode)
-      }
-    }, 0)
-  })
-  .then(() => fire('fetch:after'))
+  return fetch(vnode).
+    then(() => {
+      setTimeout(() => {
+        if (vnode.dom.getBoundingClientRect().bottom - window.innerHeight < vnode.attrs.options.triggerDistance) {
+          fetchEnoughData(vnode)
+        }
+      }, 0)
+    })
 }
 
 const ontouchstart = (e, vnode) => {
   if (document.body.scrollTop > 0) return
-
   vnode.state.touchStatus = 'start'
   vnode.state.mouseY = e.pageY
   fire('pull:start')
@@ -45,7 +42,6 @@ const ontouchstart = (e, vnode) => {
 
 const ontouchend = (e, vnode) => {
   if (vnode.state.touchStatus === 'end') return
-
   vnode.state.touchStatus = 'end'
   fire('pull:end')
 }
@@ -75,7 +71,9 @@ const oninit = vnode => {
 }
 
 const oncreate = vnode => {
+  fire('fetch:before')
   fetchEnoughData(vnode)
+    .then(() => fire('fetch:after'))
 
   on('onscroll', () => {
     if (vnode.state.isLoading) return
@@ -85,7 +83,9 @@ const oncreate = vnode => {
   on('pull:refresh', () => {
     vnode.attrs.options.cursor = 1
     vnode.attrs.options.list = []
+    fire('refresh:before')
     fetchEnoughData(vnode)
+      .then(() => fire('refresh:after'))
   })
 }
 

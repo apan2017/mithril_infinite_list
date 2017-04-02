@@ -2,7 +2,7 @@ module.exports = {
     entry: './src/index.js',
     output: {
         path: '.',
-        filename: 'mithril_inf.js',
+        filename: 'infinite_list.js',
     },
     module: {
         loaders: [{

@@ -58,7 +58,9 @@ const infiniteList = {
   oninit,
   oncreate,
   view,
-  onremove
+  onremove,
+  on,
+  fire
 }
 
 module.exports = infiniteList

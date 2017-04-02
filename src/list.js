@@ -3,17 +3,9 @@ import {on, fire} from './event.js'
 
 const fetch = vnode => {
   const options = vnode.attrs.options
-  fire('fetch:before')
   const promise = options.fetch(options.cursor)
   options.afterFetch(promise, options.list)
-  promise
-  .then(() => {
-    options.cursor += options.step
-  })
-  .then(() => {
-    fire('fetch:after')
-  })
-
+  promise.then(() => options.cursor += options.step)
   return promise
 }
 
@@ -23,11 +15,15 @@ const checkBoundAndFetch = vnode => {
   
   if (bound.bottom - winHeight < vnode.attrs.options.triggerDistance) {
     vnode.state.isLoading = true
-    fetch(vnode).then(() => vnode.state.isLoading = false)
+    fire('fetch:before')
+    fetch(vnode)
+    .then(() => vnode.state.isLoading = false)
+    .then(() => fire('fetch:after'))
   }
 }
 
 const fetchEnoughData = vnode => {
+  fire('fetch:before')
   fetch(vnode).
   then(() => {
     setTimeout(() => {
@@ -36,6 +32,7 @@ const fetchEnoughData = vnode => {
       }
     }, 0)
   })
+  .then(() => fire('fetch:after'))
 }
 
 const ontouchstart = (e, vnode) => {

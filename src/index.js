@@ -10,6 +10,7 @@ const DEFAULT = {
   cursor: 1,
   step: 1,
   triggerDistance: 200,
+  pullRefreshable: false,
   loadingText: '正在加载',
   pullDownText: '下拉刷新',
   refreshText: '松开刷新',

@@ -72,7 +72,9 @@ const initMouseMove = vnode => {
 
 const oninit = vnode => {
   vnode.state.isLoading = false
-  initMouseMove(vnode)
+  if (vnode.attrs.options.pullRefreshable) {
+    initMouseMove(vnode)
+  }
 }
 
 const oncreate = vnode => {

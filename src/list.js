@@ -40,7 +40,7 @@ const fetchEnoughData = (vnode, action) => {
 const ontouchstart = (e, vnode) => {
   if (document.body.scrollTop > 0) return
   vnode.state.touchStatus = 'start'
-  vnode.state.mouseY = e.pageY
+  vnode.state.touchY = e.touches[0].clientY
   fire('pull:start')
 }
 
@@ -53,8 +53,8 @@ const ontouchend = (e, vnode) => {
 const ontouchmove = (e, vnode) => {
   raf(() => {
     if (vnode.state.touchStatus === 'end') return
-    if (e.pageY <= vnode.state.mouseY) return
-    fire('pull:move', e.pageY - vnode.state.mouseY)
+    if (e.touches[0].clientY <= vnode.state.touchY) return
+    fire('pull:move')
   })
 }
 

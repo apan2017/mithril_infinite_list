@@ -50,7 +50,7 @@ const oncreate = vnode => {
     }
   })
 
-  on('pull:move', height => {
+  on('pull:move', () => {
     raf(() => {
       if (options.pullLimitHeight <= vnode.state.height) {
         vnode.state.isReadyRefresh = true

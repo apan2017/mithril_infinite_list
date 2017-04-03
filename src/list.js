@@ -83,6 +83,7 @@ const oninit = vnode => {
   on('pull:refresh', () => {
     options.cursor = 1
     options.list = []
+    options.hasMore = true
     fetchEnoughData(vnode, 'refresh')
   })
 

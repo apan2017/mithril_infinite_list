@@ -15,9 +15,21 @@
   </style>
 </head>
 <body>
-  <main></main>
-  <script src="../node_modules/mithril/mithril.js"></script>
-  <script src="../infinite_list.js"></script>
-  <script src="./index.js"></script>
+  <main>123</main>
+  <script src="/node_modules/mithril/mithril.js"></script>
+  <script src="/infinite_list.js"></script>
+  <script>
+    m.mount(document.querySelector('main'), {
+      view: function(vnode) {
+        return m(infiniteList, {
+          rootTag: 'ol',
+          maxCursor: 3,
+          pullRefreshable: true,
+          item: function(data, index) { return m('li', data.title) },
+          fetch: function(cursor) { return m.request('/example/data.json', {data: {page: cursor}}) }
+        })
+      }
+    })
+  </script>
 </body>
 </html>

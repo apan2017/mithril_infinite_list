@@ -43,7 +43,8 @@ const view = vnode => {
   return m('div', [
     m(pullRefresh, {options: state}),
     m(list, {options: state}),
-    m(loading, {options: state})
+    m(loading, {options: state}),
+    m('div', {style: {textAlign: 'center'}}, state.hasMore ? null : state.noMoreText)
   ])
 }
 

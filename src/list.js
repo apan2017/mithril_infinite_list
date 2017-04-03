@@ -1,36 +1,40 @@
 import {extend, raf} from './util.js'
-import {on, fire} from './event.js'
+import {on, off, fire} from './event.js'
 
-const fetch = vnode => {
+const fetch = (vnode, action) => {
   const options = vnode.attrs.options
-  const promise = options.fetch(options.cursor)
-  options.afterFetch(promise, options.list)
-  promise.then(() => options.cursor += options.step)
-  return promise
+  if (!options.hasMore) return
+
+  action = action ? action : 'fetch'
+
+  fire(action + ':before')
+  options.fetch(options.cursor)
+    .then(data => fire(action + ':after', data))
 }
 
 const checkBoundAndFetch = vnode => {
   const bound = vnode.dom.getBoundingClientRect()
   const winHeight = window.innerHeight
-  
   if (bound.bottom - winHeight < vnode.attrs.options.triggerDistance) {
-    vnode.state.isLoading = true
-    fire('fetch:before')
     fetch(vnode)
-    .then(() => vnode.state.isLoading = false)
-    .then(() => fire('fetch:after'))
   }
 }
 
-const fetchEnoughData = vnode => {
-  return fetch(vnode).
-    then(() => {
-      setTimeout(() => {
-        if (vnode.dom.getBoundingClientRect().bottom - window.innerHeight < vnode.attrs.options.triggerDistance) {
-          fetchEnoughData(vnode)
-        }
-      }, 0)
-    })
+const fetchEnoughData = (vnode, action) => {
+  action = action ? action : 'fetch'
+
+  fetch(vnode, action)
+
+  const fn = () => {
+    setTimeout(() => {
+      if (vnode.dom.getBoundingClientRect().bottom - window.innerHeight < vnode.attrs.options.triggerDistance) {
+        fetchEnoughData(vnode, action)
+      }
+      off(action + ':after', fn)
+    }, 0)
+  }
+
+  on(action + ':after', fn)
 }
 
 const ontouchstart = (e, vnode) => {
@@ -64,16 +68,12 @@ const initMouseMove = vnode => {
 }
 
 const oninit = vnode => {
+  const options = vnode.attrs.options
   vnode.state.isLoading = false
+
   if (vnode.attrs.options.pullRefreshable) {
     initMouseMove(vnode)
   }
-}
-
-const oncreate = vnode => {
-  fire('fetch:before')
-  fetchEnoughData(vnode)
-    .then(() => fire('fetch:after'))
 
   on('onscroll', () => {
     if (vnode.state.isLoading) return
@@ -81,12 +81,33 @@ const oncreate = vnode => {
   })
 
   on('pull:refresh', () => {
-    vnode.attrs.options.cursor = 1
-    vnode.attrs.options.list = []
-    fire('refresh:before')
-    fetchEnoughData(vnode)
-      .then(() => fire('refresh:after'))
+    options.cursor = 1
+    options.list = []
+    fetchEnoughData(vnode, 'refresh')
   })
+
+  on('refresh:after', data => {
+    options.list = options.list.concat(data)
+    options.cursor += options.step
+  })
+
+  on('fetch:before', () => {
+    vnode.state.isLoading = true
+  })
+
+  on('fetch:after', data => {
+    options.list = options.list.concat(data)
+    vnode.state.isLoading = false
+    options.cursor += options.step
+
+    if ((options.maxCursor > 0 && options.cursor > options.maxCursor) || !data.length) {
+      options.hasMore = false
+    }
+  })
+}
+
+const oncreate = vnode => {
+  fetchEnoughData(vnode, 'fetch')
 }
 
 const view = vnode => {

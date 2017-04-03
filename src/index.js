@@ -9,22 +9,18 @@ const DEFAULT = {
   list: [],
   cursor: 1,
   step: 1,
+  maxCursor: 0,
+  hasMore: true,
   triggerDistance: 200,
   pullRefreshable: false,
   loadingText: '正在加载',
   pullDownText: '下拉刷新',
   refreshText: '松开刷新',
   refreshingText: '正在加载',
+  noMoreText: '没有更多数据',
   pullLimitHeight: 60,
   item: () => { throw new Error('You must declare `item` function.') },
   fetch: () => { throw new Error('You must declare `fetch` function.') },
-  afterFetch: (promose, list) => {
-    promose.then(data => {
-      for (var i = 0; i < data.length; i++) {
-        list.push(data[i])
-      }
-    })
-  }
 }
 
 const oninit = vnode => {

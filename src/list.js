@@ -69,7 +69,6 @@ const initMouseMove = vnode => {
 
 const oninit = vnode => {
   const options = vnode.attrs.options
-  vnode.state.isLoading = false
 
   if (vnode.attrs.options.pullRefreshable) {
     initMouseMove(vnode)
@@ -124,6 +123,7 @@ const view = vnode => {
 }
 
 export default {
+  isLoading: false,
   oninit,
   oncreate,
   view

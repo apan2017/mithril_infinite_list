@@ -7,9 +7,6 @@ const oninit = vnode => {
     overflow: 'hidden',
     textAlign: 'center'
   }
-
-  vnode.state.isReadyRefresh = false
-  vnode.state.isRefreshing = false
 }
 
 const slideUp = (vnode, n, minHeight) => {
@@ -90,6 +87,8 @@ const view = vnode => {
 }
 
 export default {
+  isReadyRefresh: false,
+  isRefreshing: false,
   oninit,
   oncreate,
   view

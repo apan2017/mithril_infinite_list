@@ -1,3 +1,4 @@
+import stream from 'mithril/stream'
 import {extend, raf} from './util.js'
 import {on, off, fire} from './event.js'
 
@@ -71,35 +72,37 @@ const initMouseMove = vnode => {
 
 const oninit = vnode => {
   const options = vnode.attrs.options
+  const list = vnode.state.list
+  const loading = vnode.state.loading
 
   if (vnode.attrs.options.pullRefreshable) {
     initMouseMove(vnode)
   }
 
   on('onscroll', () => {
-    if (vnode.state.isLoading) return
+    if (loading()) return
     checkBoundAndFetch(vnode)
   })
 
   on('pull:refresh', () => {
+    list([])
     options.cursor = 1
-    options.list = []
     options.hasMore = true
     fetchEnoughData(vnode, 'refresh')
   })
 
   on('refresh:after', data => {
-    options.list = options.list.concat(data)
+    list(list().concat(data))
     options.cursor += options.step
   })
 
   on('fetch:before', () => {
-    vnode.state.isLoading = true
+    loading(true)
   })
 
   on('fetch:after', data => {
-    options.list = options.list.concat(data)
-    vnode.state.isLoading = false
+    list(list().concat(data))
+    loading(false)
     options.cursor += options.step
 
     if ((options.maxCursor > 0 && options.cursor > options.maxCursor) || !data.length) {
@@ -115,17 +118,21 @@ const oncreate = vnode => {
 const view = vnode => {
   const state = vnode.state
   const options = vnode.attrs.options
+  const item = options.item
 
   return(
     m(options.rootTag,
       state.touchEvents,
-      options.list.map((data, index) => options.item(data, index))
+      vnode.state.list.map((list) => {
+        return list.map((data, index) => m(item, {data: data, index: index}))
+      })()
     )
   )
 }
 
 export default {
-  isLoading: false,
+  loading: stream(false),
+  list: stream([]),
   oninit,
   oncreate,
   view

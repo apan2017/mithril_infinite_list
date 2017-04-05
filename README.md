@@ -24,7 +24,11 @@ m.mount(document.querySelector('main'), {
     rootTag: 'ol',
     maxCursor: 3,
     pullRefreshable: true,
-    item: (data, index) => m('li', data.title),
+    item: {
+      view: function(vnode) {
+        return m('li', vnode.title)
+      }
+    },
     fetch: cursor => m.request('/example/data.json', {data: {page: cursor}})
   })
 })

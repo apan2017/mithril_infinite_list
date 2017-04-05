@@ -6,7 +6,6 @@ import pullRefresh from './pull_refresh.js'
 
 const DEFAULT = {
   rootTag: 'ul',
-  list: [],
   cursor: 1,
   step: 1,
   maxCursor: 0,
@@ -19,7 +18,7 @@ const DEFAULT = {
   refreshingText: '正在加载',
   noMoreText: '没有更多数据',
   pullLimitHeight: 60,
-  item: () => { throw new Error('You must declare `item` function.') },
+  item: {},
   fetch: () => { throw new Error('You must declare `fetch` function.') },
 }
 

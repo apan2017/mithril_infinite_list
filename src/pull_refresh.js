@@ -1,12 +1,22 @@
+import stream from 'mithril/stream'
 import {on, fire} from './event.js'
 import {raf} from './util.js'
 
 const oninit = vnode => {
-  vnode.state.style = {
+  const state = vnode.state
+  const options = vnode.attrs.options
+
+  state.style = {
     height: '0px',
     overflow: 'hidden',
     textAlign: 'center'
   }
+
+  state.render = stream.combine((readyRefresh, refreshing) => {
+    if (readyRefresh()) return options.refreshText
+    if (refreshing()) return options.refreshingText
+    return options.pullDownText
+  }, [state.readyRefresh, state.refreshing])
 }
 
 const slideUp = (vnode, n, minHeight) => {
@@ -31,8 +41,11 @@ const oncreate = vnode => {
   const dom = vnode.dom
   const n = vnode.state.height / 10
 
+  const readyRefresh = vnode.state.readyRefresh
+  const refreshing = vnode.state.refreshing
+
   on('pull:start', () => {
-    vnode.state.isReadyRefresh = false
+    readyRefresh(false)
     vnode.state.height = 0
     vnode.state.style.height = '0px'
     m.redraw()
@@ -50,7 +63,7 @@ const oncreate = vnode => {
   on('pull:move', () => {
     raf(() => {
       if (options.pullLimitHeight <= vnode.state.height) {
-        vnode.state.isReadyRefresh = true
+        readyRefresh(true)
       }
 
       vnode.state.height += ((options.pullLimitHeight - vnode.state.height) / options.pullLimitHeight + 1)
@@ -60,35 +73,28 @@ const oncreate = vnode => {
   })
 
   on('refresh:before', () => {
-    vnode.state.isRefreshing = true
+    refreshing(true)
     m.redraw()
   })
 
   on('refresh:after', () => {
-    vnode.state.isRefreshing = false
+    refreshing(false)
     m.redraw()
     slideUp(vnode, n, 0)
   })
 }
 
 const view = vnode => {
-  const options = vnode.attrs.options
-  const state = vnode.state
-
-  var text
-  text = state.isReadyRefresh ? options.refreshText : options.pullDownText
-  text = state.isRefreshing ? options.refreshingText : text
-
   return(
     m('div', {style: vnode.state.style}, [
-      m('span', text)
+      m('span', vnode.state.render())
     ])
   )
 }
 
 export default {
-  isReadyRefresh: false,
-  isRefreshing: false,
+  readyRefresh: stream(false),
+  refreshing: stream(false),
   oninit,
   oncreate,
   view

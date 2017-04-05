@@ -72,6 +72,7 @@ const oncreate = vnode => {
     })
   })
 
+  // todo: 此处不会触发重绘
   on('refresh:before', () => {
     refreshing(true)
     m.redraw()

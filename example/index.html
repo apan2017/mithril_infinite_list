@@ -29,7 +29,6 @@
       view: function(vnode) {
         return m(infiniteList, {
           rootTag: 'ol',
-          maxCursor: 3,
           pullRefreshable: true,
           fetch: function(cursor) { return m.request('/example/data.json', {data: {page: cursor}}) },
           item: item

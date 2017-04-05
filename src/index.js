@@ -3,6 +3,7 @@ import {extend, raf} from './util.js'
 import {on, fire} from './event.js'
 import list from './list.js'
 import pullRefresh from './pull_refresh.js'
+import {bounce} from './spinners/index'
 
 const DEFAULT = {
   rootTag: 'ul',
@@ -12,10 +13,10 @@ const DEFAULT = {
   hasMore: true,
   triggerDistance: 200,
   pullRefreshable: false,
-  loadingText: '正在加载',
+  loadingText: m(bounce),
   pullDownText: '下拉刷新',
   refreshText: '松开刷新',
-  refreshingText: '正在加载',
+  refreshingText: m(bounce),
   noMoreText: '没有更多数据',
   pullLimitHeight: 60,
   item: {},
@@ -38,7 +39,6 @@ const oncreate = vnode => {
 
 const view = vnode => {
   const state = vnode.state
-
   return m('div', [
     m(pullRefresh, {options: state}),
     m(list, {options: state}),
@@ -57,7 +57,8 @@ const infiniteList = {
   view,
   onremove,
   on,
-  fire
+  fire,
+  bounce
 }
 
 module.exports = infiniteList

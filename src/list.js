@@ -54,6 +54,8 @@ const ontouchmove = (e, vnode) => {
   raf(() => {
     if (vnode.state.touchStatus === 'end') return
     if (e.touches[0].clientY <= vnode.state.touchY) return
+
+    e.preventDefault()
     fire('pull:move')
   })
 }
